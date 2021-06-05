@@ -1,106 +1,96 @@
+import numpy as np
+import tensorflow.compat.v1 as tf
+import matplotlib.pyplot as plt
+import cv2
+import time
+import requests as r
 
-import os
-if "HADOOP_CONF_DIR" in os.environ:
-    del os.environ["HADOOP_CONF_DIR"] 
+class DetectorAPI:
+    def __init__(self, path_to_ckpt):
+        self.path_to_ckpt = path_to_ckpt
 
-import socket
-from pyspark import SparkConf, SparkContext, SQLContext
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import udf, length, when, col
-from pyspark.sql.types import BooleanType, IntegerType, LongType, StringType, ArrayType, FloatType, StructType, StructField
-import pyspark.sql.functions as F
-from pyspark.sql.functions import pandas_udf
-from pyspark.sql.functions import PandasUDFType
-from jinja2 import Environment, FileSystemLoader
-from pyspark.sql.functions import col, window, from_json
-from pyspark.sql.types import *
+        self.detection_graph = tf.Graph()
+        with self.detection_graph.as_default():
+            od_graph_def = tf.GraphDef()
+            with tf.gfile.GFile(self.path_to_ckpt, 'rb') as fid:
+                serialized_graph = fid.read()
+                od_graph_def.ParseFromString(serialized_graph)
+                tf.import_graph_def(od_graph_def, name='')
 
-# setting constants
-APP_NAME = "jupsparkapp"
-NORMALIZED_APP_NAME = APP_NAME.replace('/', '_').replace(':', '_')
+        self.default_graph = self.detection_graph.as_default()
+        self.sess = tf.Session(graph=self.detection_graph)
+        self.image_tensor = self.detection_graph.get_tensor_by_name('image_tensor:0')
+        self.detection_boxes = self.detection_graph.get_tensor_by_name('detection_boxes:0')
+        self.detection_scores = self.detection_graph.get_tensor_by_name('detection_scores:0')
+        self.detection_classes = self.detection_graph.get_tensor_by_name('detection_classes:0')
+        self.num_detections = self.detection_graph.get_tensor_by_name('num_detections:0')
 
-APPS_TMP_DIR = os.path.join(os.getcwd(), "tmp")
-APPS_CONF_DIR = os.path.join(os.getcwd(), "conf")
-APPS_LOGS_DIR = os.path.join(os.getcwd(), "logs")
-LOG4J_PROP_FILE = os.path.join(APPS_CONF_DIR, "pyspark-log4j-{}.properties".format(NORMALIZED_APP_NAME))
-LOG_FILE = os.path.join(APPS_LOGS_DIR, 'pyspark-{}.log'.format(NORMALIZED_APP_NAME))
-EXTRA_JAVA_OPTIONS = "-Dlog4j.configuration=file://{} -Dspark.hadoop.dfs.replication=1 -Dhttps.protocols=TLSv1.0,TLSv1.1,TLSv1.2,TLSv1.3"\
-    .format(LOG4J_PROP_FILE)
+    def processFrame(self, image):
+        image_np_expanded = np.expand_dims(image, axis=0)
+        start_time = time.time()
+        (boxes, scores, classes, num) = self.sess.run(
+            [self.detection_boxes, self.detection_scores, self.detection_classes, self.num_detections],
+            feed_dict={self.image_tensor: image_np_expanded})
+        end_time = time.time()
 
-LOCAL_IP = socket.gethostbyname(socket.gethostname())
+    #    print("Elapsed Time:", end_time-start_time)
 
-# preparing configuration files from templates
-for directory in [APPS_CONF_DIR, APPS_LOGS_DIR, APPS_TMP_DIR]:
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+        im_height, im_width,_ = image.shape
+        boxes_list = [None for i in range(boxes.shape[1])]
+        for i in range(boxes.shape[1]):
+            boxes_list[i] = (int(boxes[0,i,0] * im_height),
+                        int(boxes[0,i,1]*im_width),
+                        int(boxes[0,i,2] * im_height),
+                        int(boxes[0,i,3]*im_width))
 
-env = Environment(loader=FileSystemLoader('/opt'))
-template = env.get_template("pyspark_log4j.properties.template")
-template\
-    .stream(logfile=LOG_FILE)\
-    .dump(LOG4J_PROP_FILE)
+        return boxes_list, scores[0].tolist(), [int(x) for x in classes[0].tolist()], int(num[0])
 
-# run spark
-spark = SparkSession\
-    .builder\
-    .appName(APP_NAME)\
-    .master("k8s://https://10.32.7.103:6443")\
-    .config("spark.driver.host", LOCAL_IP)\
-    .config("spark.driver.bindAddress", "0.0.0.0")\
-    .config("spark.executor.instances", "2")\
-    .config("spark.executor.cores", '3')\
-    .config("spark.memory.fraction", "0.8")\
-    .config("spark.memory.storageFraction", "0.6")\
-    .config("spark.executor.memory", '3g')\
-    .config("spark.driver.memory", "3g")\
-    .config("spark.driver.maxResultSize", "1g")\
-    .config("spark.kubernetes.memoryOverheadFactor", "0.3")\
-    .config("spark.driver.extraJavaOptions", EXTRA_JAVA_OPTIONS)\
-    .config("spark.kubernetes.namespace", "zvolovikova-283281")\
-    .config("spark.kubernetes.driver.label.appname", APP_NAME)\
-    .config("spark.kubernetes.executor.label.appname", APP_NAME)\
-    .config("spark.kubernetes.container.image", "node03.st:5000/spark-executor:zvolovikova-283281")\
-    .config("spark.local.dir", "/tmp/spark")\
-    .config("spark.driver.extraClassPath", "/home/jovyan/shared-data/my-project-name-jar-with-dependencies.jar")\
-    .config("spark.executor.extraClassPath", "/home/jovyan/shared-data/my-project-name-jar-with-dependencies.jar")\
-    .config("spark.kubernetes.executor.volumes.emptyDir.spark-local-dir-tmp-spark.mount.path", "/tmp/spark")\
-    .config("spark.kubernetes.executor.volumes.emptyDir.spark-local-dir-tmp-spark.mount.readOnly", "false")\
-    .config("spark.kubernetes.executor.volumes.hostPath.depdir.mount.path", "/home/jovyan/shared-data")\
-    .config("spark.kubernetes.executor.volumes.hostPath.depdir.options.path", "/nfs/shared")\
-    .config("spark.kubernetes.executor.volumes.hostPath.depdir.options.type", "Directory")\
-    .config("spark.kubernetes.executor.volumes.hostPath.depdir.mount.readOnly", "true")\
-    .getOrCreate()
+    def close(self):
+        self.sess.close()
+        self.default_graph.close()
 
-# printing important urls and pathes
-print("Web UI: {}".format(spark.sparkContext.uiWebUrl))
-print("\nlog4j file: {}".format(LOG4J_PROP_FILE))
-print("\ndriver log file: {}".format(LOG_FILE))
+def loadpic(src):
+    img = r.get(src)
+    img_file = open('loaded.jpg', 'wb')
+    img_file.write(img.content)
+    img_file.close()
+    return cv2.imread('loaded.jpg')
 
+####################################
+model_path = 'frozen_inference_graph.pb'
+odapi = DetectorAPI(path_to_ckpt=model_path)
+#####################################
 
-#%%
-userSchema = StructType()\
-                .add("timestamp", TimestampType())\
-                .add("word", StringType())\
-                .add("key", StringType())
-df = spark \
-    .readStream \
-    .format("kafka") \
-    .option("kafka.bootstrap.servers", "kafka-svc:9092") \
-    .option("subscribePattern", "id.*") \
-    .load()
+def human_count(src):
+    threshold = 0.7
+    img = loadpic(src)
+    img = cv2.resize(img, (640, 480))
+    boxes, scores, classes, num = odapi.processFrame(img)
+    human_count = 0
+    for i in range(len(boxes)):
+        if classes[i] == 1 and scores[i] > threshold:
+            human_count += 1
+    return human_count
+
+def get_people_number(cameras):
+    mean_value = 0
+    count = 0
+    camera_number = [114, 124, 123, 121, 112, 113, 77, 54, 55, 53,105, 108, 106]
+    for i in camera_number:
+        try:
+            mean_value+= human_count('http://www.cactus.tv:8080/cam%d/preview.jpg'%i)
+            count+=1
+        except Exception as e:
+            continue
+    return mean_value
 
 
-universe = df.selectExpr("CAST(value AS STRING)","CAST(key AS STRING)")\
-    .select(from_json(col("value"), userSchema).alias('value')).select('value.*')
 
-universe = universe.groupBy(window('timestamp', "1 minutes", "1 minutes"),'key').count() 
-#     .writeStream\
-#     .outputMode("update")\
-#     .format("console") \
-#     .awaitTermination()
+if __name__ == "__main__":
 
-universe_query = universe.writeStream.trigger(processingTime="2 minutes").outputMode("update").format("console").start()
-
-universe_query.awaitTermination()
+    life_centers = {"dream_complex":[114, 124, 123, 121, 112, 113, 77, 54, 55, 53,105, 108, 106],
+                    "murinski":[17, 15, 71, 16, 73, 56, 120, 32],
+                    "new_murino":[153, 155, 154, 10, 119]}
+    print(get_people_number(life_centers["new_murino"]))
 
 
