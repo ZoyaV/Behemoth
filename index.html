@@ -318,7 +318,7 @@
                                     <h6 class="m-0 font-weight-bold text-primary">Illustrations</h6>
                                 </div>
                                 <div class="card-body">
-                                    <div class="text-center">
+                                 <!--   <div class="text-center">
                                         <img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="width: 25rem;"
                                             src="img/undraw_posting_photo.svg" alt="...">
                                     </div>
@@ -327,7 +327,27 @@
                                         constantly updated collection of beautiful svg images that you can use
                                         completely free and without attribution!</p>
                                     <a target="_blank" rel="nofollow" href="https://undraw.co/">Browse Illustrations on
-                                        unDraw &rarr;</a>
+                                        unDraw &rarr;</a> -->
+                                        <div id="venn"><svg width="600" height="350"><g class="venn-area venn-circle" data-venn-sets="A"><path d="
+M 184.16021264966827 175 
+m -160 0 
+a 160 160 0 1 0 320 0 
+a 160 160 0 1 0 -320 0" style="fill-opacity: 0.25; fill: rgb(31, 119, 180);"></path><text class="label" text-anchor="middle" dy=".35em" x="140" y="174" style="fill: rgb(31, 119, 180);"><tspan x="140" y="174" dy="0.35em">A</tspan></text></g><g class="venn-area venn-circle" data-venn-sets="B"><path d="
+M 415.8397873503318 175 
+m -160 0 
+a 160 160 0 1 0 320 0 
+a 160 160 0 1 0 -320 0" style="fill-opacity: 0.25; fill: rgb(255, 127, 14);"></path><text class="label" text-anchor="middle" dy=".35em" x="460" y="175" style="fill: rgb(255, 127, 14);"><tspan x="460" y="175" dy="0.35em">B</tspan></text></g><g class="venn-area venn-intersection" data-venn-sets="A_B"><path d="
+M 300 285.3682185533042 
+A 160 160 0 0 1 300 64.63178144669581 
+A 160 160 0 0 1 300 285.3682185533042" style="fill-opacity: 0;"></path><text class="label" text-anchor="middle" dy=".35em" x="300" y="174" style="fill: rgb(68, 68, 68);"><tspan x="300" y="174" dy="0.35em"></tspan></text></g></svg></div>
+                                        <script> 
+                                            var sets = [ {sets: ['A'], size: 12}, 
+                                             {sets: ['B'], size: 12},
+                                             {sets: ['A','B'], size: 2}];
+
+                                            var chart = venn.VennDiagram()
+                                            d3.select("#venn").datum(sets).call(chart);
+                                        </script>
                                 </div>
                             </div>
 
@@ -385,6 +405,7 @@
     </div>
 
     <!-- Bootstrap core JavaScript-->
+     <script src="https://d3js.org/d3.v5.js"></script>
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
@@ -393,6 +414,8 @@
 
     <!-- Custom scripts for all pages-->
     <script src="js/sb-admin-2.min.js"></script>
+    <script src="js/venn.min.js"></script>
+    <script src="js/venn.js"></script>
 
     <!-- Page level plugins -->
     <script src="vendor/chart.js/Chart.min.js"></script>
