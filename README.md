@@ -1,3 +1,4 @@
+
 # BEHEMOH
 
 A project to help analyze the demand for small businesses in catering.
@@ -12,5 +13,11 @@ https://drive.google.com/file/d/1F6E_UHSyxzQVCkcSdxDN22uzNXqyzO_V/view ;
 
 ...
 
+
 ### Сamera data source
 http://www.cactus.tv
+
+### Data-driven scheme 
+
+![](/gifs/interests.png)
+![](/gifs/camera.png)
