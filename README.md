@@ -6,7 +6,8 @@ A project to help analyze the demand for small businesses in catering.
 
 As an example of the work, three residential complexes of the Murino and Devyatkino districts were taken.
 
-Residential complex <<Dream>>
+Residential complex DREAM
+
 https://drive.google.com/file/d/1F6E_UHSyxzQVCkcSdxDN22uzNXqyzO_V/view ;
 
 ...
