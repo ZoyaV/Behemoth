@@ -64,13 +64,13 @@ def random_ages():
 @app.route("/sex", methods=['GET','POST'])
 def sex():
     global male, female
-    if datetime.datetime.now().minute %5 == 0:
-        if request.args['complex'] == '0':
-            male, female = random_sex()
-        if request.args['complex'] == '1':
-            male, female = random_sex()
-        if request.args['complex'] == '2':
-            male, female = random_sex()
+    # if datetime.datetime.now().minute %5 == 0:
+    if request.args['complex'] == '0':
+        male, female = random_sex()
+    if request.args['complex'] == '1':
+        male, female = random_sex()
+    if request.args['complex'] == '2':
+        male, female = random_sex()
     resp = make_response(jsonify({"male" : male, "female" : female}))
     resp.headers["Access-Control-Allow-Origin"] = "*"
     return resp
@@ -79,13 +79,13 @@ def sex():
 @app.route("/ages", methods=['GET', 'POST'])
 def ages():
     global age18, age18_26, age26_40, age40_60, age60
-    if datetime.datetime.now().minute %5 == 0:
-        if request.args['complex'] == '0':
-            ge18,age18_26,age26_40,age40_60,age60 = random_ages()
-        if request.args['complex'] == '1':
-            ge18,age18_26,age26_40,age40_60,age60 = random_ages()
-        if request.args['complex'] == '2':
-            ge18,age18_26,age26_40,age40_60,age60 = random_ages()
+    # if datetime.datetime.now().minute %5 == 0:
+    if request.args['complex'] == '0':
+        ge18,age18_26,age26_40,age40_60,age60 = random_ages()
+    if request.args['complex'] == '1':
+        ge18,age18_26,age26_40,age40_60,age60 = random_ages()
+    if request.args['complex'] == '2':
+        ge18,age18_26,age26_40,age40_60,age60 = random_ages()
     resp = make_response(jsonify({ "age18": age18,
                      "age18_26": age18_26,
                      "age26_40": age26_40,
@@ -99,13 +99,13 @@ interests_chart = random_interests()
 @app.route("/interests", methods=['GET','POST'])
 def interests():
     global interests_chart
-    if datetime.datetime.now().minute %5 == 0:
-        if request.args['complex'] == '0':
-            interests_chart = random_interests()
-        if request.args['complex'] == '1':
-            interests_chart = random_interests()
-        if request.args['complex'] == '2':
-            interests_chart = random_interests()
+    # if datetime.datetime.now().minute %5 == 0:
+    if request.args['complex'] == '0':
+        interests_chart = random_interests()
+    if request.args['complex'] == '1':
+        interests_chart = random_interests()
+    if request.args['complex'] == '2':
+        interests_chart = random_interests()
     resp = make_response(jsonify( {'interest':interests_chart}))
     resp.headers['Access-Control-Allow-Origin'] = "*"
     return resp

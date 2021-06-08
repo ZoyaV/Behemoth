@@ -1,18 +1,18 @@
 
-async function fetchInterests() {
-  const ints = fetch('http://localhost:5000/interests').then(res => res.json());
+async function fetchInterests(index) {
+  const ints = fetch('http://localhost:5000/interests?' + 'complex=' + index).then(res => res.json());
 
   return ints;
 }
 
-async function fetchSex() {
-  const sexes = fetch('http://localhost:5000/sex').then(res => res.json());
+async function fetchSex(index) {
+  const sexes = fetch('http://localhost:5000/sex?' + 'complex=' + index).then(res => res.json());
 
   return sexes;
 }
 
-async function setPeople() {
-  const sexes = await fetchSex();
+async function setPeople(index) {
+  const sexes = await fetchSex(index);
   const { male, female } = sexes;
   const people = male + female;
   document.getElementById('num_of_people').innerText = people;
@@ -20,17 +20,15 @@ async function setPeople() {
   document.getElementById('num_of_women').innerText = female;
 }
 
-async function setAges() {
-
-}
-
-async function setInterests() {
+async function setInterests(index) {
   /**
    * @type {Array}
    */
-  const { interest } = await fetchInterests();
-  const container = [];
+  const { interest } = await fetchInterests(index);
   const root = document.getElementById('interests-container');
+  const children = Array.from(root.children);
+  children.forEach(ch => root.removeChild(ch));
+
   const VISIBILITY_RATE = 5;
 
   const total_num = interest.reduce(function (total, curr) {
@@ -84,8 +82,28 @@ async function setInterests() {
   return interest;
 }
 
-(async () => {
-  await setPeople();
-  const sets = await setInterests();
-  window.sets = sets;
-})();
+
+
+
+async function loadPeople(index = 0) {
+  await setPeople(index);
+  const sets = await setInterests(index);
+  // window.sets = sets;
+
+  const setsReady = new CustomEvent('setsReady', {
+    detail: {
+      sets: sets
+    },
+    bubbles: true
+  });
+
+  document.dispatchEvent(setsReady);
+};
+
+document.addEventListener('loadData', (e) => {
+  console.log(e.detail.index);
+  loadPeople(e.detail.index);
+});
+
+
+loadPeople();

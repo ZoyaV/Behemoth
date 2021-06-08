@@ -3,19 +3,22 @@ Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,Bli
 Chart.defaults.global.defaultFontColor = '#858796';
 
 
-async function fetchAges() {
-  const ages = await fetch('http://localhost:5000/ages').then(res => res.json());
+async function fetchAges(index = 0) {
+  const ages = await fetch('http://localhost:5000/ages?' + 'complex=' + index).then(res => res.json());
 
   return ages;
 }
 
-(async () => {
+async function loadAge(index = 0) {
   // Pie Chart with Ages
-  const ages = await fetchAges();
+  const ages = await fetchAges(index);
   const labels = Object.keys(ages);
   const data = Object.values(ages);
-  console.log(data);
+
   const ages_container = document.getElementById('age_labels');
+  const children = Array.from(ages_container.children);
+  children.forEach(ch => ages_container.removeChild(ch));
+
   const backgroundColors = ['#FB4B4B', '#FFD355', '#91FF60', '#ADF2FF', '#B088FF'];
   const hoverColors = ['#FE3131', '#FFC726', '#60FF19', '#5EE5FE', '#8142FF'];
 
@@ -66,5 +69,12 @@ async function fetchAges() {
     },
   });
 
-})();
+};
+
+
+document.addEventListener('loadData', (e) => {
+  loadAge(e.detail.index);
+})
+
+loadAge();
 
