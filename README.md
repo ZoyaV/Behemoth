@@ -24,8 +24,13 @@ http://www.cactus.tv
 ![](/gifs/camera.png)
 
 
-### Client
+### Client (Инструкция по запуску клиента и сервера)
+Переходим в папку server, тянем зависимость и запускаем
 cd server && pip install -U flask-cors && python main.py
+
+Переходим в корень проекта и устанавливаем express как веб-сервер для клиента
 cd ../
 npm install
+
+Запускаем клиент
 node index.js
