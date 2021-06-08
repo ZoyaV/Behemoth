@@ -3,20 +3,23 @@ import random
 from typing import Optional, List
 import numpy as np
 import datetime
+import time
 
-from flask import Flask, request, jsonify, request
+from flask import Flask, request, jsonify, request, make_response
+from flask_cors import CORS
 
 from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import BadRequest
 
 app = Flask(__name__)
+CORS(app)
 
 hobbies = ['swim', 'art', 'IT', 'sport', 'school', 'languages', 'ecology', 'adventure']
 
 male = 140
 female = 146
 age18 = 18
-age18_26 = 0
+age18_26 = 36
 age26_40 = 89
 age40_60 = 9
 age60 = 6
@@ -30,6 +33,7 @@ def random_interests():
         sets.append(hobby)
         count.append(random.randint(100,200))
     happy_dict = dict(zip(sets, count))
+    print(happy_dict)
     for i in range(random.randint(10, 20)):
         new_arr = np.random.permutation(hobbies)[:random.randint(2,4)].tolist()
         value_arr = [happy_dict[arg] for arg in new_arr]
@@ -67,8 +71,9 @@ def sex():
             male, female = random_sex()
         if request.args['complex'] == '2':
             male, female = random_sex()
-
-    return jsonify({ "male": male,  "female": female})
+    resp = make_response(jsonify({"male" : male, "female" : female}))
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    return resp
 
 
 @app.route("/ages", methods=['GET', 'POST'])
@@ -81,12 +86,14 @@ def ages():
             ge18,age18_26,age26_40,age40_60,age60 = random_ages()
         if request.args['complex'] == '2':
             ge18,age18_26,age26_40,age40_60,age60 = random_ages()
-    return jsonify({ "age18": age18,
+    resp = make_response(jsonify({ "age18": age18,
                      "age18_26": age18_26,
                      "age26_40": age26_40,
                      "age40_60": age40_60,
                      "age60": age60,
-                     })
+                     }))
+    resp.headers['Access-Control-Allow-Origin'] = "*"
+    return resp
 
 interests_chart = random_interests()
 @app.route("/interests", methods=['GET','POST'])
@@ -99,7 +106,9 @@ def interests():
             interests_chart = random_interests()
         if request.args['complex'] == '2':
             interests_chart = random_interests()
-    return jsonify( {'interst':interests_chart})
+    resp = make_response(jsonify( {'interest':interests_chart}))
+    resp.headers['Access-Control-Allow-Origin'] = "*"
+    return resp
 
 
 if __name__ == "__main__":

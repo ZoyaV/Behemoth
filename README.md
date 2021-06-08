@@ -22,3 +22,10 @@ http://www.cactus.tv
 
 ![](/gifs/interests.png)
 ![](/gifs/camera.png)
+
+
+### Client
+cd server && pip install -U flask-cors && python main.py
+cd ../
+npm install
+node index.js

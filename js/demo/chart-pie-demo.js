@@ -2,34 +2,69 @@
 Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
 Chart.defaults.global.defaultFontColor = '#858796';
 
-// Pie Chart Example
-var ctx = document.getElementById("myPieChart");
-var myPieChart = new Chart(ctx, {
-  type: 'doughnut',
-  data: {
-    labels: ["Direct", "Referral", "Social"],
-    datasets: [{
-      data: [55, 30, 15],
-      backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc'],
-      hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf'],
-      hoverBorderColor: "rgba(234, 236, 244, 1)",
-    }],
-  },
-  options: {
-    maintainAspectRatio: false,
-    tooltips: {
-      backgroundColor: "rgb(255,255,255)",
-      bodyFontColor: "#858796",
-      borderColor: '#dddfeb',
-      borderWidth: 1,
-      xPadding: 15,
-      yPadding: 15,
-      displayColors: false,
-      caretPadding: 10,
+
+async function fetchAges() {
+  const ages = await fetch('http://localhost:5000/ages').then(res => res.json());
+
+  return ages;
+}
+
+(async () => {
+  // Pie Chart with Ages
+  const ages = await fetchAges();
+  const labels = Object.keys(ages);
+  const data = Object.values(ages);
+  console.log(data);
+  const ages_container = document.getElementById('age_labels');
+  const backgroundColors = ['#FB4B4B', '#FFD355', '#91FF60', '#ADF2FF', '#B088FF'];
+  const hoverColors = ['#FE3131', '#FFC726', '#60FF19', '#5EE5FE', '#8142FF'];
+
+  labels.forEach((l, index) => {
+    const span = document.createElement('span');
+    span.classList.add('mr-2');
+
+    const i = document.createElement('i');
+    const strong = document.createElement('strong');
+    strong.innerText = l.toUpperCase();
+
+    i.classList.add('fas', 'fa-circle', 'mr-1');
+    i.style.color = backgroundColors[index];
+    span.appendChild(i);
+    span.appendChild(strong);
+    ages_container.appendChild(span);
+  })
+
+
+  var ctx = document.getElementById("myPieChart");
+  var myPieChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: data,
+        backgroundColor: backgroundColors,
+        hoverBackgroundColor: hoverColors,
+        hoverBorderColor: "rgba(234, 236, 244, 1)",
+      }],
     },
-    legend: {
-      display: false
+    options: {
+      maintainAspectRatio: false,
+      tooltips: {
+        backgroundColor: "rgb(255,255,255)",
+        bodyFontColor: "#858796",
+        borderColor: '#dddfeb',
+        borderWidth: 1,
+        xPadding: 15,
+        yPadding: 15,
+        displayColors: false,
+        caretPadding: 10,
+      },
+      legend: {
+        display: false
+      },
+      cutoutPercentage: 80,
     },
-    cutoutPercentage: 80,
-  },
-});
+  });
+
+})();
+
