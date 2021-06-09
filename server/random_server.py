@@ -24,6 +24,16 @@ age26_40 = 89
 age40_60 = 9
 age60 = 6
 
+def random_timeline():
+    timeline = {'time':[], 'number':[]}
+    line = [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,0,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,0]
+    N = random.randint(1, 18)
+    start_point = random.randint(0, 17)
+    timeline['time'] = line[start_point:start_point+N]
+    for i in range(N):
+        count = random.randint(1,40)
+        timeline['number'].append(count)
+    return timeline
 
 def random_interests():
     global hobbies
@@ -60,7 +70,6 @@ def random_ages():
 
     return age18,age18_26,age26_40,age40_60,age60
 
-
 @app.route("/sex", methods=['GET','POST'])
 def sex():
     global male, female
@@ -72,6 +81,22 @@ def sex():
     if request.args['complex'] == '2':
         male, female = random_sex()
     resp = make_response(jsonify({"male" : male, "female" : female}))
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    return resp
+
+_timeline = random_timeline()
+
+@app.route("/timeline", methods=['GET','POST'])
+def timeline():
+    global _timeline
+    # if datetime.datetime.now().minute %5 == 0:
+    if request.args['complex'] == '0':
+        _timeline = random_timeline()
+    if request.args['complex'] == '1':
+        _timeline = random_timeline()
+    if request.args['complex'] == '2':
+        _timeline = random_timeline()
+    resp = make_response(jsonify(_timeline))
     resp.headers["Access-Control-Allow-Origin"] = "*"
     return resp
 
