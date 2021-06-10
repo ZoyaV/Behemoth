@@ -116,7 +116,6 @@ async function loadPeople(index = 0) {
 };
 
 document.addEventListener('loadData', (e) => {
-  console.log(e.detail.index);
   loadPeople(e.detail.index);
 });
 
