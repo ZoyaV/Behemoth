@@ -40,38 +40,45 @@ async function setInterests(index) {
   if (children.length == 0) {
     const container = [];
 
+    const doubles = {};
+
     // Отрисовываем бары
     interest.forEach((val, i, arr) => {
       const { sets } = val;
-      console.log(sets);
+
       if (sets.length === 1) {
-        const { size } = val;
-        const percentage = Math.round((size / total_num) * 100);
+        sets[0] in doubles ? doubles[sets[0]]++ : doubles[sets[0]] = 1;
 
-        const el_container = document.createElement('div');
+        if (sets[0] in doubles === false || doubles[sets[0]] === 1) {
+          const { size } = val;
+          const percentage = Math.round((size / total_num) * 100);
 
-        const header = document.createElement('h4');
-        header.classList.add('small', 'font-weight-bold');
+          const el_container = document.createElement('div');
 
-        header.innerText = sets[0].replace('hobbi', '').toUpperCase();
+          const header = document.createElement('h4');
+          header.classList.add('small', 'font-weight-bold');
 
-        const span = document.createElement('span');
-        span.classList.add('float-right');
-        span.innerText = percentage + '%';
+          header.innerText = sets[0].replace('hobbi', '').toUpperCase();
 
-        const progress = document.createElement('div');
-        progress.classList.add('progress', 'mb-4');
+          const span = document.createElement('span');
+          span.classList.add('float-right');
+          span.innerText = percentage + '%';
 
-        const progress_inner = document.createElement('div');
-        progress_inner.classList.add('progress-bar');
-        progress_inner.style.backgroundColor = 'rgba(255, 30, 30,' + percentage / 100 * VISIBILITY_RATE + ')';
-        progress_inner.style.width = percentage + '%';
+          const progress = document.createElement('div');
+          progress.classList.add('progress', 'mb-4');
 
-        header.appendChild(span);
-        progress.appendChild(progress_inner);
-        el_container.appendChild(header);
-        el_container.appendChild(progress);
-        container.push(el_container);
+          const progress_inner = document.createElement('div');
+          progress_inner.classList.add('progress-bar');
+          progress_inner.style.backgroundColor = 'rgba(255, 30, 30,' + percentage / 100 * VISIBILITY_RATE + ')';
+          progress_inner.style.width = percentage + '%';
+
+          header.appendChild(span);
+          progress.appendChild(progress_inner);
+          el_container.appendChild(header);
+          el_container.appendChild(progress);
+          container.push(el_container);
+        }
+
       }
     });
 
