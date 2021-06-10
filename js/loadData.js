@@ -25,26 +25,30 @@ async function setInterests(index) {
    * @type {Array}
    */
   const { interest } = await fetchInterests(index);
-
+  console.log(interest);
   const root = document.getElementById('interests-container');
   const children = Array.from(root.children);
   const VISIBILITY_RATE = 5;
+  let doubles = {};
 
   const total_num = interest.reduce(function (total, curr) {
     const { sets } = curr;
-    if (sets.length === 1)
+    sets[0] in doubles ? doubles[sets[0]]++ : doubles[sets[0]] = 1;
+    if (sets.length === 1 && (sets[0] in doubles === false || doubles[sets[0]] === 1))
       return total + curr.size;
     return total;
   }, 0);
 
+  doubles = {}
+
   if (children.length == 0) {
     const container = [];
-
-    const doubles = {};
 
     // Отрисовываем бары
     interest.forEach((val, i, arr) => {
       const { sets } = val;
+
+
 
       if (sets.length === 1) {
         sets[0] in doubles ? doubles[sets[0]]++ : doubles[sets[0]] = 1;
