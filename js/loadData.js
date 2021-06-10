@@ -25,13 +25,14 @@ async function setInterests(index) {
    * @type {Array}
    */
   const { interest } = await fetchInterests(index);
+
   const root = document.getElementById('interests-container');
   const children = Array.from(root.children);
   const VISIBILITY_RATE = 5;
 
   const total_num = interest.reduce(function (total, curr) {
     const { sets } = curr;
-    if (typeof sets === 'string')
+    if (sets.length === 1)
       return total + curr.size;
     return total;
   }, 0);
@@ -42,8 +43,8 @@ async function setInterests(index) {
     // Отрисовываем бары
     interest.forEach((val, i, arr) => {
       const { sets } = val;
-
-      if (typeof sets === 'string') {
+      console.log(sets);
+      if (sets.length === 1) {
         const { size } = val;
         const percentage = Math.round((size / total_num) * 100);
 
@@ -51,7 +52,8 @@ async function setInterests(index) {
 
         const header = document.createElement('h4');
         header.classList.add('small', 'font-weight-bold');
-        header.innerText = sets;
+
+        header.innerText = sets[0].replace('hobbi', '').toUpperCase();
 
         const span = document.createElement('span');
         span.classList.add('float-right');
@@ -115,9 +117,6 @@ async function loadPeople(index = 0) {
   document.dispatchEvent(setsReady);
 };
 
-document.addEventListener('loadData', (e) => {
-  loadPeople(e.detail.index);
-});
 
 
 loadPeople();
