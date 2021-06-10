@@ -12,6 +12,8 @@ Residential complex DREAM
 https://drive.google.com/file/d/1F6E_UHSyxzQVCkcSdxDN22uzNXqyzO_V/view ;
 
 https://drive.google.com/file/d/1-J72CTRw-MLc7kO4Ho9cVPj1QSvo6f0J/view - 200;
+
+https://drive.google.com/file/d/1B8Dv3Ez99zaYW9Q9mLAmdwnj1af6QmZu/view?usp=sharing - 200; // spb_murinsky_posad
 ...
 
 
