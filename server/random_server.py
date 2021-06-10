@@ -43,7 +43,7 @@ def random_interests():
         sets.append(hobby)
         count.append(random.randint(100,200))
     happy_dict = dict(zip(sets, count))
-    print(happy_dict)
+    
     for i in range(random.randint(10, 20)):
         new_arr = np.random.permutation(hobbies)[:random.randint(2,4)].tolist()
         value_arr = [happy_dict[arg] for arg in new_arr]
